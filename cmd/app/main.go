@@ -2,16 +2,14 @@ package main
 
 import (
 	"context"
+	"echo/internal/app"
+	"echo/internal/config"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
-
-	"github.com/joho/godotenv"
-	"honnef.co/go/tools/config"
 )
 
 // @title Finance Tracker API
@@ -27,16 +25,9 @@ import (
 // @name Authorization
 // @description Введите ваш JWT токен без префикса "Bearer"
 func main() {
-	envPath := filepath.Join("..", ".env")
-
-	err := godotenv.Load(envPath)
-
-	logger := log.New(os.Stdout, "[transaction-service] ", log.LstdFlags)
+	logger := log.New(os.Stdout, "[echo] ", log.LstdFlags)
 
 	cfg := config.Load()
-	// if err != nil {
-	// 	logger.Fatal(err)
-	// }
 
 	application, err := app.New(cfg, logger)
 	if err != nil {
@@ -44,8 +35,7 @@ func main() {
 	}
 
 	go func() {
-		// Изменено: cfg.Server.Env и cfg.Server.Port
-		logger.Printf("starting server on :%s", cfg.APIPort)
+		logger.Printf("starting server on :%s", cfg.App.APIPort)
 		if err := application.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatal(err)
 		}

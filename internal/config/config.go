@@ -10,6 +10,14 @@ type Config struct {
 	App      App
 	Database Database
 	JWT      JWT
+	MinIO    MinIO
+}
+
+type MinIO struct {
+	Endpoint   string
+	AccessKey  string
+	SecretKey  string
+	BucketName string
 }
 
 type App struct {

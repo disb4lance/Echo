@@ -2,9 +2,9 @@ package minio
 
 import (
 	"context"
+	"echo/internal/config"
 	"fmt"
 	"mime/multipart"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -17,29 +17,34 @@ type MinioStorage struct {
 	BaseURL    string
 }
 
-func NewMinioStorage(endpoint, accessKey, secretKey, bucketName, baseURL string, useSSL bool) (*MinioStorage, error) {
-	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+func NewMinioStorage(config config.MinIO) (*MinioStorage, error) {
+	useSSL := false // для локальной разработки
+	baseURL := ""   // опционально
+
+	client, err := minio.New(config.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.AccessKey, config.SecretKey, ""),
 		Secure: useSSL,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create minio client: %w", err)
 	}
 
-	exists, err := client.BucketExists(context.Background(), bucketName)
+	exists, err := client.BucketExists(context.Background(), config.BucketName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to check bucket: %w", err)
 	}
+
 	if !exists {
-		if err := client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{}); err != nil {
-			return nil, err
+		err = client.MakeBucket(context.Background(), config.BucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create bucket: %w", err)
 		}
 	}
 
 	return &MinioStorage{
 		Client:     client,
-		BucketName: bucketName,
-		BaseURL:    strings.TrimRight(baseURL, "/"),
+		BucketName: config.BucketName,
+		BaseURL:    baseURL,
 	}, nil
 }
 

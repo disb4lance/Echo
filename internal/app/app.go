@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"echo/internal/adapter/minio"
 	"echo/internal/adapter/postgres"
 	"echo/internal/config"
 	handler "echo/internal/handler/http"
@@ -38,11 +39,16 @@ func New(cfg *config.Config, logger *log.Logger) (*App, error) {
 	}
 
 	// Репозитории
-	photoRepo := postgres.NewUserPhotoRepo(db)
 	profileRepo := postgres.NewUserProfileRepo(db)
+	txManaget := postgres.NewTxManager(db)
+	minIO, err := minio.NewMinioStorage(cfg.MinIO)
+
+	if err != nil {
+		return nil, err
+	}
 
 	// Сервис
-	catSer := service.NewUserPhotoService(photoRepo)
+	catSer := service.NewUserPhotoService(txManaget, minIO)
 	transSer := service.NewUserProfileService(profileRepo)
 
 	// Хендлер
