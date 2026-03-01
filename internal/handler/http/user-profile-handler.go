@@ -30,7 +30,7 @@ func NewUserProfileHandler(profileService *service.UserProfileService) *UserProf
 // @Failure      400  {object}  string "invalid body"
 // @Failure      409  {object}  string "profile already exists"
 // @Router       /profiles [post]
-func (h *UserProfileHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserProfileHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req dto.UserProfileRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -60,7 +60,7 @@ func (h *UserProfileHandler) CreateProfile(w http.ResponseWriter, r *http.Reques
 // @Failure      400  {object}  string "invalid user id"
 // @Failure      404  {object}  string "profile not found"
 // @Router       /profiles/{id} [get]
-func (h *UserProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
 	userIDStr := uuid.New().String() // TODO брать из токена
 
 	userID, err := uuid.Parse(userIDStr)
@@ -92,7 +92,7 @@ func (h *UserProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) 
 // @Failure      400  {object}  string "invalid body or user id"
 // @Failure      404  {object}  string "profile not found"
 // @Router       /profiles/{id} [put]
-func (h *UserProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *UserProfileHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userIDStr := uuid.New().String() // TODO брать из токена
 
 	userID, err := uuid.Parse(userIDStr)
