@@ -6,7 +6,6 @@ import (
 )
 
 func TestUserProfile_CalculateAge(t *testing.T) {
-	// Используем реальную текущую дату
 	now := time.Now()
 	currentYear := now.Year()
 

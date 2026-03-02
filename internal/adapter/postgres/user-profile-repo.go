@@ -23,10 +23,17 @@ func (r *UserProfileRepo) Create(profile *entity.UserProfile) error {
 	defer cancel()
 
 	_, err := r.db.Exec(ctx,
-		`INSERT INTO user_profiles (user_id, name, birth_date, gender, description, is_active, created_at, updated_at)
-    VALUES ($1, $2, $3, 'male', $4, $5, $6, $7)`,
-		profile.UserID, profile.Name, profile.BirthDate, profile.Description,
-		profile.IsActive, profile.CreatedAt, profile.UpdatedAt,
+		`INSERT INTO user_profiles 
+	(user_id, name, birth_date, gender, description, is_active, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		profile.UserID,
+		profile.Name,
+		profile.BirthDate,
+		profile.Gender,
+		profile.Description,
+		profile.IsActive,
+		profile.CreatedAt,
+		profile.UpdatedAt,
 	)
 	return err
 }
@@ -43,8 +50,16 @@ func (r *UserProfileRepo) GetById(userId uuid.UUID) (*entity.UserProfile, error)
 		userId,
 	)
 
-	err := row.Scan(&profile.UserID, &profile.Name, &profile.BirthDate, &profile.Gender, &profile.Description,
-		&profile.IsActive, &profile.CreatedAt, &profile.UpdatedAt)
+	err := row.Scan(
+		&profile.UserID,
+		&profile.Name,
+		&profile.BirthDate,
+		&profile.Gender,
+		&profile.Description,
+		&profile.IsActive,
+		&profile.CreatedAt,
+		&profile.UpdatedAt,
+	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil

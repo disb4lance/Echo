@@ -53,7 +53,7 @@ func Load() *Config {
 			DBPort:     getEnv("DB_PORT", "5434"),
 			DBUser:     getEnv("DB_USER", "postgres"),
 			DBPassword: getEnv("DB_PASSWORD", "postgres"),
-			DBName:     getEnv("DB_NAME", "mydatabase"),
+			DBName:     getEnv("DB_NAME", "echo_db"),
 			DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWT{

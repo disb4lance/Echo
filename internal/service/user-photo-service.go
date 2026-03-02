@@ -79,12 +79,11 @@ func (s *UserPhotoService) ReplaceUserPhotos(ctx context.Context, userID uuid.UU
 		})
 	}
 
-	err = s.txManager.WithTx(ctx, func(tx postgres.DBTX) error {
-		repo := postgres.NewUserPhotoRepo(tx)
-		if err := repo.DeleteByUserID(userID); err != nil {
+	err = s.txManager.WithTx(ctx, func(uow *postgres.UnitOfWork) error {
+		if err := uow.UserPhotoRepo.DeleteByUserID(userID); err != nil {
 			return err
 		}
-		return repo.CreateMany(photos)
+		return uow.UserPhotoRepo.CreateMany(photos)
 	})
 	if err != nil {
 		return nil, err
@@ -94,12 +93,17 @@ func (s *UserPhotoService) ReplaceUserPhotos(ctx context.Context, userID uuid.UU
 }
 
 func (s *UserPhotoService) DeleteUserPhotos(ctx context.Context, userID uuid.UUID) error {
+
 	if err := s.minioStore.DeleteUserFiles(ctx, userID.String()); err != nil {
 		return err
 	}
 
-	return s.txManager.WithTx(ctx, func(tx postgres.DBTX) error {
-		repo := postgres.NewUserPhotoRepo(tx)
-		return repo.DeleteByUserID(userID)
+	return s.txManager.WithTx(ctx, func(uow *postgres.UnitOfWork) error {
+
+		if err := uow.UserPhotoRepo.DeleteByUserID(userID); err != nil {
+			return err
+		}
+
+		return nil
 	})
 }
