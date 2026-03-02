@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	pkg "transaction-service/internal/pkg/jwt"
+	pkg "echo/internal/pkg/jwt"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

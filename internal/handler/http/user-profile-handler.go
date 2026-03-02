@@ -5,6 +5,7 @@ import (
 	"echo/internal/service/dto"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -27,8 +28,9 @@ func NewUserProfileHandler(profileService *service.UserProfileService) *UserProf
 // @Produce      json
 // @Param        request body dto.UserProfileRequest true "Данные профиля"
 // @Success      201  {object}  dto.UserProfileResponse
-// @Failure      400  {object}  string "invalid body"
-// @Failure      409  {object}  string "profile already exists"
+// @Failure      400  {string}  string "invalid body"
+// @Failure      409  {string}  string "profile already exists"
+// @Security BearerAuth
 // @Router       /profiles [post]
 func (h *UserProfileHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req dto.UserProfileRequest
@@ -57,13 +59,21 @@ func (h *UserProfileHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Param        id path string true "ID пользователя" Format(uuid)
 // @Success      200  {object}  dto.UserProfileResponse
-// @Failure      400  {object}  string "invalid user id"
-// @Failure      404  {object}  string "profile not found"
+// @Failure      401  {string}  string "id parameter is required"
+// @Failure      400  {string}  string "invalid user id"
+// @Failure      404  {string}  string "profile not found"
+// @Security BearerAuth
 // @Router       /profiles/{id} [get]
 func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
-	userIDStr := uuid.New().String() // TODO брать из токена
+	path := strings.TrimPrefix(r.URL.Path, "/api/v1/profiles/")
+	idStr := strings.TrimSuffix(path, "/")
 
-	userID, err := uuid.Parse(userIDStr)
+	if idStr == "" {
+		http.Error(w, "id parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := uuid.Parse(idStr)
 	if err != nil {
 		http.Error(w, "invalid user id", http.StatusBadRequest)
 		return
@@ -89,8 +99,9 @@ func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Param        id path string true "ID пользователя" Format(uuid)
 // @Param        request body dto.UserProfileRequest true "Данные для обновления"
 // @Success      200  {object}  dto.UserProfileResponse
-// @Failure      400  {object}  string "invalid body or user id"
-// @Failure      404  {object}  string "profile not found"
+// @Failure      400  {string}  string "invalid body or user id"
+// @Failure      404  {string}  string "profile not found"
+// @Security BearerAuth
 // @Router       /profiles/{id} [put]
 func (h *UserProfileHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userIDStr := uuid.New().String() // TODO брать из токена

@@ -18,6 +18,8 @@ type MinIO struct {
 	AccessKey  string
 	SecretKey  string
 	BucketName string
+	UseSSL     bool
+	Location   string
 }
 
 type App struct {
@@ -46,21 +48,43 @@ func Load() *Config {
 			APIHost: getEnv("API_HOST", "0.0.0.0"),
 			APIPort: getEnv("API_PORT", "8081"),
 		},
-
 		Database: Database{
 			DBHost:     getEnv("DB_HOST", "localhost"),
-			DBPort:     getEnv("POSTGRES_PORT", "5432"),
-			DBUser:     getEnv("POSTGRES_USER", "transaction"),
-			DBPassword: getEnv("POSTGRES_PASSWORD", "password"),
-			DBName:     getEnv("POSTGRES_DB", "transaction_db"),
+			DBPort:     getEnv("DB_PORT", "5434"),
+			DBUser:     getEnv("DB_USER", "postgres"),
+			DBPassword: getEnv("DB_PASSWORD", "postgres"),
+			DBName:     getEnv("DB_NAME", "mydatabase"),
 			DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWT{
-			JWTSecret:            getEnv("JWT_SECRET", "secret"),
+			JWTSecret:            getEnv("JWT_SECRET", "xITmnGcNLhpe/R@qfuA>R1lfV/KTkF1v9J8++:mfS*l"),
 			JWTAccessExpiration:  getDuration("JWT_ACCESS_EXPIRATION", 15*time.Minute),
-			JWTRefreshExpiration: getDuration("JWT_REFRESH_EXPIRATION", 24*time.Hour),
+			JWTRefreshExpiration: getDuration("JWT_REFRESH_EXPIRATION", 24*time.Hour*7),
+		},
+		MinIO: MinIO{
+			Endpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
+			AccessKey:  getEnv("MINIO_ACCESS_KEY", "minioadmin"),
+			SecretKey:  getEnv("MINIO_SECRET_KEY", "minioadmin"),
+			BucketName: getEnv("MINIO_BUCKET_NAME", "uploads"),
+			UseSSL:     getEnvAsBool("MINIO_USE_SSL", false),
+			Location:   getEnv("MINIO_LOCATION", "us-east-1"),
 		},
 	}
+}
+
+// Вспомогательная функция для bool значений
+func getEnvAsBool(key string, defaultValue bool) bool {
+	val := os.Getenv(key)
+	if val == "" {
+		return defaultValue
+	}
+
+	boolVal, err := strconv.ParseBool(val)
+	if err != nil {
+		return defaultValue
+	}
+
+	return boolVal
 }
 
 func getEnv(key, fallback string) string {

@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-// @title Finance Tracker API
+// @title Echo Api
 // @version 1.0
-// @description API для управления личными финансами
+// @description API дейтинг сервиса
 
 // @host localhost:8081
 // @BasePath /api/v1

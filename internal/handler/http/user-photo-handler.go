@@ -24,10 +24,11 @@ func NewUserPhotoHandler(photoService *service.UserPhotoService) *UserPhotoHandl
 // @Tags         user-photos
 // @Accept       multipart/form-data
 // @Produce      json
-// @Param        photos formData file true "Файлы фото" collectionFormat(multi)
+// @Param photos formData []file true "Файлы фото"
 // @Success      200  {array}  entity.UserPhoto
-// @Failure      400  {object}  string "invalid files"
-// @Failure      500  {object}  string "internal server error"
+// @Failure      400  {string}  string "invalid files"
+// @Failure      500  {string}  string "internal server error"
+// @Security BearerAuth
 // @Router       /user/photos [put]
 func (h *UserPhotoHandler) ReplaceUserPhotos(w http.ResponseWriter, r *http.Request) {
 	userID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111") // TODO: брать из токена
@@ -62,7 +63,8 @@ func (h *UserPhotoHandler) ReplaceUserPhotos(w http.ResponseWriter, r *http.Requ
 // @Tags         user-photos
 // @Produce      json
 // @Success      200  {array}  entity.UserPhoto
-// @Failure      404  {object}  string "photos not found"
+// @Failure      404  {string}  string "photos not found"
+// @Security BearerAuth
 // @Router       /user/photos [get]
 func (h *UserPhotoHandler) GetUserPhotos(w http.ResponseWriter, r *http.Request) {
 	userID, _ := uuid.Parse("11111111-1111-1111-1111-111111111111") // TODO: брать из токена

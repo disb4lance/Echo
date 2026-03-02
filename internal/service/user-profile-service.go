@@ -37,13 +37,13 @@ func (s *UserProfileService) CreateProfile(request *dto.UserProfileRequest) (*dt
 
 	userID := uuid.New() //TODO брать из токена
 
-	existing, err := s.repo.GetById(userID)
-	if err != nil {
-		return nil, err
-	}
-	if existing != nil {
-		return nil, ErrProfileAlreadyExists
-	}
+	// existing, err := s.repo.GetById(userID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if existing != nil {
+	// 	return nil, ErrProfileAlreadyExists
+	// }
 
 	profile := dto.ToEntity(request, userID)
 
