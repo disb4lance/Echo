@@ -40,6 +40,7 @@ func New(cfg *config.Config, logger *log.Logger) (*App, error) {
 
 	// Репозитории
 	profileRepo := postgres.NewUserProfileRepo(db)
+	photoRepo := postgres.NewUserPhotoRepo(db)
 	txManaget := postgres.NewTxManager(db)
 	minIO, err := minio.NewMinioStorage(cfg.MinIO)
 
@@ -48,12 +49,12 @@ func New(cfg *config.Config, logger *log.Logger) (*App, error) {
 	}
 
 	// Сервис
-	catSer := service.NewUserPhotoService(txManaget, minIO)
-	transSer := service.NewUserProfileService(profileRepo)
+	photoService := service.NewUserPhotoService(photoRepo, txManaget, minIO)
+	profileService := service.NewUserProfileService(profileRepo)
 
 	// Хендлер
-	photoHandler := handler.NewUserPhotoHandler(catSer)
-	profileHandler := handler.NewUserProfileHandler(transSer)
+	photoHandler := handler.NewUserPhotoHandler(photoService)
+	profileHandler := handler.NewUserProfileHandler(profileService)
 
 	// router
 	router := transport.NewRouter(photoHandler, profileHandler, cfg)

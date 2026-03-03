@@ -18,14 +18,16 @@ type MinioStorage interface {
 }
 
 type UserPhotoService struct {
+	photoRepo  *postgres.UserPhotoRepo
 	txManager  *postgres.TxManager
 	minioStore MinioStorage
 }
 
-func NewUserPhotoService(txManager *postgres.TxManager, minioStore MinioStorage) *UserPhotoService {
+func NewUserPhotoService(photoRepo *postgres.UserPhotoRepo, txManager *postgres.TxManager, minioStore MinioStorage) *UserPhotoService {
 	return &UserPhotoService{
 		txManager:  txManager,
 		minioStore: minioStore,
+		photoRepo:  photoRepo,
 	}
 }
 
@@ -57,9 +59,12 @@ func (s *UserPhotoService) AddUserPhotos(ctx context.Context, userID uuid.UUID, 
 	return photos, nil
 }
 
-func (s *UserPhotoService) GetUserPhotos(ctx context.Context, userID uuid.UUID) ([]entity.UserPhoto, error) {
-	repo := postgres.NewUserPhotoRepo(s.txManager.Pool())
-	return repo.GetByUserID(userID)
+func (s *UserPhotoService) GetUserPhotos(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]entity.UserPhoto, error) {
+
+	return s.photoRepo.GetByUserID(userID)
 }
 
 func (s *UserPhotoService) ReplaceUserPhotos(ctx context.Context, userID uuid.UUID, files []*multipart.FileHeader) ([]entity.UserPhoto, error) {
