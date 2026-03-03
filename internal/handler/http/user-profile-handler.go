@@ -1,11 +1,11 @@
 package http
 
 import (
+	"echo/internal/middleware"
 	"echo/internal/service"
 	"echo/internal/service/dto"
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 )
@@ -57,7 +57,7 @@ func (h *UserProfileHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Tags         profiles
 // @Accept       json
 // @Produce      json
-// @Param        id path string true "ID пользователя" Format(uuid)
+// @Param        id query string true "ID пользователя" Format(uuid)
 // @Success      200  {object}  dto.UserProfileResponse
 // @Failure      401  {string}  string "id parameter is required"
 // @Failure      400  {string}  string "invalid user id"
@@ -65,9 +65,13 @@ func (h *UserProfileHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Router       /profiles/{id} [get]
 func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
-	path := strings.TrimPrefix(r.URL.Path, "/api/v1/profiles/")
-	idStr := strings.TrimSuffix(path, "/")
+	_, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 
+	idStr := r.URL.Query().Get("id")
 	if idStr == "" {
 		http.Error(w, "id parameter is required", http.StatusBadRequest)
 		return
@@ -96,7 +100,7 @@ func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Tags         profiles
 // @Accept       json
 // @Produce      json
-// @Param        id path string true "ID пользователя" Format(uuid)
+// @Param        id query string true "ID пользователя" Format(uuid)
 // @Param        request body dto.UserProfileRequest true "Данные для обновления"
 // @Success      200  {object}  dto.UserProfileResponse
 // @Failure      400  {string}  string "invalid body or user id"
@@ -104,9 +108,19 @@ func (h *UserProfileHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Router       /profiles/{id} [put]
 func (h *UserProfileHandler) Update(w http.ResponseWriter, r *http.Request) {
-	userIDStr := uuid.New().String() // TODO брать из токена
+	_, ok := middleware.GetUserID(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 
-	userID, err := uuid.Parse(userIDStr)
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "id parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := uuid.Parse(idStr)
 	if err != nil {
 		http.Error(w, "invalid user id", http.StatusBadRequest)
 		return
